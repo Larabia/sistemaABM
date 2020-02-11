@@ -36,6 +36,9 @@ public class AppBaseABMPersona {
 				case 4:
 					listado(conexion);
 					break;
+				case 5:
+					buscarXnombre(conexion, sc);
+					break;
 				case 0:
 
 					break;
@@ -51,6 +54,33 @@ public class AppBaseABMPersona {
 			System.out.println("Se produjo un error de coneccion con la base de datos.");
 		}
 	}
+	
+	
+//---------------------------- 5.BUSCAR POR NOMBRE (METODO)---------------------------------
+
+		private static void buscarXnombre(Connection conexion, Scanner sc) {
+			System.out.println();
+			System.out.println("BUSQUEDA POR NOMBRE");
+			System.out.println("-------------------");
+			Statement stmt;
+			try {
+				System.out.println("Ingrese el nombre o las primeras letras");
+				String busqueda = sc.next();
+
+				stmt = conexion.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT * FROM persona\r\n" + "WHERE NOMBRE LIKE '" + busqueda + "%';");
+				while (rs.next()) {
+					Date fNac = rs.getDate(4);
+					System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + fNac);
+				}
+
+				System.out.println();
+			} catch (SQLException e) {
+				System.out.println("BUSQUEDA POR NOMBRE produjo un error al cargar los datos en la base.");
+
+			}
+
+		}
 
 //---------------------------- 4.LISTADO (METODO)---------------------------------
 
@@ -70,7 +100,9 @@ public class AppBaseABMPersona {
 
 			System.out.println("FIN LISTADO------------");
 			System.out.println();
+		
 		} catch (SQLException e) {
+			System.out.println("LISTADO produjo un error al cargar los datos en la base.");
 
 		}
 
@@ -318,6 +350,7 @@ public class AppBaseABMPersona {
 		System.out.println("2: MODIFICACION ");
 		System.out.println("3: BAJA");
 		System.out.println("4: LISTADO");
+		System.out.println("5: BUSCAR POR NOMBRE");
 		System.out.println("0: SALIR");
 		int opcion = 0;
 		opcion = sc.nextInt();
