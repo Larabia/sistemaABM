@@ -87,7 +87,6 @@ public class AppBaseABMPersona {
 		Statement stmt;
 
 		try {
-			
 
 			stmt = conexion.createStatement();
 			ResultSet rs = stmt
@@ -139,7 +138,7 @@ public class AppBaseABMPersona {
 
 		Statement stmt;
 		try {
-			
+
 			stmt = conexion.createStatement();
 			ResultSet rs = stmt
 					.executeQuery("SELECT ID, NOMBRE, EDAD, FECHA_NACIMIENTO FROM persona WHERE ID=" + id + ";");
@@ -153,7 +152,7 @@ public class AppBaseABMPersona {
 			System.out.println("1.NOMBRE| 2.EDAD| 3.FECHA_NACIMIENTO|4.Salir");
 			int col = sc.nextInt();
 
-			while (col == (1 | 2 | 3)) {
+			while (col != 4) {
 
 				switch (col) {
 				case 1:
@@ -176,6 +175,23 @@ public class AppBaseABMPersona {
 
 					stmt.executeUpdate(insert);
 
+					Date fNac = rs.getDate(4);
+					int edadBase = calcularEdad(fNac);
+
+					if (edadBase != ed) {
+						System.out.println("Actualice la fecha de nacimiento (aaaa-mm-dd):");
+						String fe = sc.next();
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+						Date fechaNac = sdf.parse(fe);
+						int edad = calcularEdad(fechaNac);
+						stmt = conexion.createStatement();
+						insert = "UPDATE persona SET FECHA_NACIMIENTO ='" + fe + "', EDAD=" + edad + " WHERE ID=" + id
+								+ ";";
+
+						stmt.executeUpdate(insert);
+
+					}
+
 					break;
 
 				case 3:
@@ -183,8 +199,10 @@ public class AppBaseABMPersona {
 					String fe = sc.next();
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 					Date fechaNac = sdf.parse(fe);
+					int edad = calcularEdad(fechaNac);
 					stmt = conexion.createStatement();
-					insert = "UPDATE persona SET FECHA_NACIMIENTO ='" + fe + "' WHERE ID=" + id + ";";
+					insert = "UPDATE persona SET FECHA_NACIMIENTO ='" + fe + "', EDAD=" + edad + " WHERE ID=" + id
+							+ ";";
 
 					stmt.executeUpdate(insert);
 
@@ -204,7 +222,6 @@ public class AppBaseABMPersona {
 				System.out.println("1.NOMBRE| 2.EDAD| 3.FECHA_NACIMIENTO|4.Salir");
 				col = sc.nextInt();
 
-				
 			}
 		} catch (SQLException e) {
 			System.out.println("MODIFICACION DE PERSONA produjo un error al cargar los datos en la base.");
@@ -234,7 +251,6 @@ public class AppBaseABMPersona {
 
 			int edad = calcularEdad(fechaNac);
 
-			
 			stmt = conexion.createStatement();
 			String insert = "INSERT INTO PERSONA (NOMBRE, EDAD, FECHA_NACIMIENTO) VALUES ('" + nombre + "', " + edad
 					+ ", '" + fNac + "') ;";
