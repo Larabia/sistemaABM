@@ -15,6 +15,9 @@ public class AppBaseABMPersona {
 
 	public static void main(String[] args) {
 
+		System.out.println("SISTEMA DE PERSONAS (ABM)");
+		System.out.println("=========================");
+
 		Connection conexion = null;
 		try {
 			conexion = AdminBD.obtenerConexion();
@@ -54,217 +57,8 @@ public class AppBaseABMPersona {
 			System.out.println("Se produjo un error de coneccion con la base de datos.");
 		}
 	}
-	
-	
-//---------------------------- 5.BUSCAR POR NOMBRE (METODO)---------------------------------
 
-		private static void buscarXnombre(Connection conexion, Scanner sc) {
-			System.out.println();
-			System.out.println("BUSQUEDA POR NOMBRE");
-			System.out.println("-------------------");
-			Statement stmt;
-			try {
-				System.out.println("Ingrese el nombre o las primeras letras");
-				String busqueda = sc.next();
-
-				stmt = conexion.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT * FROM persona\r\n" + "WHERE NOMBRE LIKE '" + busqueda + "%';");
-				while (rs.next()) {
-					Date fNac = rs.getDate(4);
-					System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + fNac);
-				}
-
-				System.out.println();
-			} catch (SQLException e) {
-				System.out.println("BUSQUEDA POR NOMBRE produjo un error al cargar los datos en la base.");
-
-			}
-
-		}
-
-//---------------------------- 4.LISTADO (METODO)---------------------------------
-
-	private static void listado(Connection conexion) {
-		System.out.println();
-		System.out.println("LISTADO--------------------");
-		System.out.println("ID-NOMBRE-----EDAD-----F.NACIM---------");
-		Statement stmt;
-		try {
-
-			stmt = conexion.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM PERSONA");
-			while (rs.next()) {
-				Date fNac = rs.getDate(4);
-				System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + fNac);
-			}
-
-			System.out.println("FIN LISTADO------------");
-			System.out.println();
-		
-		} catch (SQLException e) {
-			System.out.println("LISTADO produjo un error al cargar los datos en la base.");
-
-		}
-
-	}
-
-//------------------------3. BAJA DE PERSONA (METODO)---------------------------------
-	private static void baja(Connection conexion, Scanner sc) {
-
-		System.out.println("BAJA DE PERSONA");
-		System.out.println("---------------");
-		System.out.println("Ingrese ID:");
-		int id = sc.nextInt();
-
-		Statement stmt;
-
-		try {
-
-			stmt = conexion.createStatement();
-			ResultSet rs = stmt
-					.executeQuery("SELECT ID, NOMBRE, EDAD, FECHA_NACIMIENTO FROM persona WHERE ID=" + id + ";");
-
-			while (rs.next()) {
-				Date fNac = rs.getDate(4);
-				System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + fNac);
-
-				System.out.println("Esta seguro de que desea borrar estos datos?");
-				System.out.println("1.SI| 2.NO");
-				int op = sc.nextInt();
-
-				switch (op) {
-				case 1:
-					stmt = conexion.createStatement();
-					String insert = "DELETE FROM persona WHERE ID = " + id + ";";
-					stmt.executeUpdate(insert);
-
-					System.out.println("Los datos fueron borrados exitosamente");
-					listado(conexion);
-
-					break;
-
-				case 2:
-					mostrarMenu(sc);
-					break;
-
-				default:
-					break;
-				}
-
-			}
-
-		} catch (SQLException e) {
-			System.out.println("BAJA DE PERSONA produjo un error al cargar los datos en la base.");
-		}
-
-	}
-
-//----------------------2.MODIFICACION DE PERSONA (METODO)---------------------------
-
-	private static void modificacion(Connection conexion, Scanner sc) {
-
-		System.out.println("MODIFICACION DE PERSONA");
-		System.out.println("---------------");
-		System.out.println("Ingrese ID:");
-		int id = sc.nextInt();
-
-		Statement stmt;
-		try {
-
-			stmt = conexion.createStatement();
-			ResultSet rs = stmt
-					.executeQuery("SELECT ID, NOMBRE, EDAD, FECHA_NACIMIENTO FROM persona WHERE ID=" + id + ";");
-
-			while (rs.next()) {
-				Date fNac = rs.getDate(4);
-				System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + fNac);
-			}
-
-			System.out.println("ingrese la columna que desea modificar");
-			System.out.println("1.NOMBRE| 2.EDAD| 3.FECHA_NACIMIENTO|4.Salir");
-			int col = sc.nextInt();
-
-			while (col != 4) {
-
-				switch (col) {
-				case 1:
-
-					System.out.println("ingrese nuevo nombre:");
-					String nom = sc.next();
-					stmt = conexion.createStatement();
-					String insert = "UPDATE persona SET NOMBRE = '" + nom + "' WHERE ID=" + id + ";";
-
-					stmt.executeUpdate(insert);
-
-					break;
-
-				case 2:
-					System.out.println("ingrese nueva edad:");
-					int ed = sc.nextInt();
-
-					stmt = conexion.createStatement();
-					insert = "UPDATE persona SET EDAD =" + ed + " WHERE ID=" + id + ";";
-
-					stmt.executeUpdate(insert);
-
-					Date fNac = rs.getDate(4);
-					int edadBase = calcularEdad(fNac);
-
-					if (edadBase != ed) {
-						System.out.println("Actualice la fecha de nacimiento (aaaa-mm-dd):");
-						String fe = sc.next();
-						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-						Date fechaNac = sdf.parse(fe);
-						int edad = calcularEdad(fechaNac);
-						stmt = conexion.createStatement();
-						insert = "UPDATE persona SET FECHA_NACIMIENTO ='" + fe + "', EDAD=" + edad + " WHERE ID=" + id
-								+ ";";
-
-						stmt.executeUpdate(insert);
-
-					}
-
-					break;
-
-				case 3:
-					System.out.println("Ingrese fecha nacimiento (aaaa-mm-dd):");
-					String fe = sc.next();
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-					Date fechaNac = sdf.parse(fe);
-					int edad = calcularEdad(fechaNac);
-					stmt = conexion.createStatement();
-					insert = "UPDATE persona SET FECHA_NACIMIENTO ='" + fe + "', EDAD=" + edad + " WHERE ID=" + id
-							+ ";";
-
-					stmt.executeUpdate(insert);
-
-					break;
-
-				default:
-					break;
-
-				}
-
-				rs = stmt.executeQuery("SELECT ID, NOMBRE, EDAD, FECHA_NACIMIENTO FROM persona WHERE ID=" + id + ";");
-				while (rs.next()) {
-					System.out.println("El usuario ha sido modificado exitosamente");
-					System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + rs.getDate(4));
-				}
-				System.out.println("ingrese la columna que desea modificar");
-				System.out.println("1.NOMBRE| 2.EDAD| 3.FECHA_NACIMIENTO|4.Salir");
-				col = sc.nextInt();
-
-			}
-		} catch (SQLException e) {
-			System.out.println("MODIFICACION DE PERSONA produjo un error al cargar los datos en la base.");
-		} catch (ParseException e) {
-			System.out.println("La fecha ingresada es incorrecta.");
-			modificacion(conexion, sc);
-		}
-
-	}
-
-//------------------------1.ALTA DE PERSONA (METODO)---------------------------------
+	/*------------------------1.ALTA DE PERSONA(METODO)---------------------------------*/
 
 	private static void alta(Connection conexion, Scanner sc) {
 
@@ -289,12 +83,17 @@ public class AppBaseABMPersona {
 
 			stmt.executeUpdate(insert);
 
-			ResultSet rs = stmt.executeQuery("select * from persona");
-			while (rs.next()) {
-				int ID = rs.getInt(1);
-				System.out.println(rs.getString(2) + "  " + rs.getInt(3) + "  " + rs.getDate(4));
-			}
+			System.out.println("Los datos se cargaron exitosamente:");
 
+			stmt = conexion.createStatement();
+
+			ResultSet rs = stmt.executeQuery(
+					"SELECT ID FROM persona WHERE NOMBRE='" + nombre + "'AND FECHA_NACIMIENTO='" + fNac + "';");
+
+			while (rs.next()) {
+				int id = rs.getInt(1);
+				mostrarPorID(conexion, sc, id);
+			}
 			conexion.close();
 
 		} catch (SQLException e) {
@@ -307,7 +106,192 @@ public class AppBaseABMPersona {
 
 	}
 
-//------------------------CALCULAR EDAD (METODO)---------------------------------
+	/*----------------------2.MODIFICACION DE PERSONA(METODO)---------------------------*/
+
+	private static void modificacion(Connection conexion, Scanner sc) {
+
+		try {
+
+			System.out.println("Ingrese el ID que desea modificar:");
+			int id = sc.nextInt();
+			mostrarPorID(conexion, sc, id);
+			System.out.println("ingrese la columna que desea modificar");
+			System.out.println("1.NOMBRE| 2.EDAD| 3.FECHA_NACIMIENTO|4.Salir");
+			int col = sc.nextInt();
+
+			while (col != 4) {
+
+				switch (col) {
+				case 1:
+
+					System.out.println("ingrese nuevo nombre:");
+					String nomNew = sc.next();
+					Statement stmt = conexion.createStatement();
+					String insert = "UPDATE persona SET NOMBRE = '" + nomNew + "' WHERE ID=" + id + ";";
+
+					stmt.executeUpdate(insert);
+
+					break;
+
+				case 2:
+					System.out.println("ingrese nueva edad:");
+					int edNew = sc.nextInt();
+					stmt = conexion.createStatement();
+					insert = "UPDATE persona SET EDAD =" + edNew + " WHERE ID=" + id + ";";
+					stmt.executeUpdate(insert);
+
+					// verifica si la fecha de nacimiento coincide con la edad nueva
+					ResultSet rs = stmt.executeQuery(
+							"SELECT ID, NOMBRE, EDAD, FECHA_NACIMIENTO FROM persona WHERE ID=" + id + ";");
+					Date fNac = rs.getDate(4);
+					int edadBase = calcularEdad(fNac);
+
+					if (edadBase != edNew) {
+						System.out.println("Actualice la fecha de nacimiento (aaaa-mm-dd):");
+						String fe = sc.next();
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+						Date fechaNac = sdf.parse(fe);
+						int edad = calcularEdad(fechaNac);
+
+						stmt = conexion.createStatement();
+						insert = "UPDATE persona SET FECHA_NACIMIENTO ='" + fe + "', EDAD=" + edad + " WHERE ID=" + id
+								+ ";";
+						stmt.executeUpdate(insert);
+
+					}
+
+					break;
+
+				case 3:
+					System.out.println("Ingrese fecha nacimiento (aaaa-mm-dd):");
+					String feNew = sc.next();
+					// actualiza la edad en fucion de la nueva fecha de nacimiento
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					Date fechaNac = sdf.parse(feNew);
+					int edad = calcularEdad(fechaNac);
+					stmt = conexion.createStatement();
+					insert = "UPDATE persona SET FECHA_NACIMIENTO ='" + feNew + "', EDAD=" + edad + " WHERE ID=" + id
+							+ ";";
+					stmt.executeUpdate(insert);
+
+					break;
+
+				default:
+					break;
+
+				}
+
+				System.out.println("El usuario ha sido modificado exitosamente");
+				mostrarPorID(conexion, sc, id);
+				System.out.println("ingrese la columna que desea modificar");
+				System.out.println("1.NOMBRE| 2.EDAD| 3.FECHA_NACIMIENTO|4.Salir");
+				col = sc.nextInt();
+
+			}
+		} catch (SQLException e) {
+			System.out.println("MODIFICACION DE PERSONA produjo un error al cargar los datos en la base.");
+		} catch (ParseException e) {
+			System.out.println("La fecha ingresada es incorrecta.");
+			modificacion(conexion, sc);
+		}
+
+	}
+
+	/* ------------------------3. BAJA DEPERSONA(METODO)---------------------------------*/
+
+	private static void baja(Connection conexion, Scanner sc) {
+
+		try {
+
+			System.out.println("Ingrese el ID que desea borrar:");
+			int id = sc.nextInt();
+			mostrarPorID(conexion, sc, id);
+			System.out.println("Esta seguro de que desea borrar estos datos?");
+			System.out.println("1.SI| 2.NO");
+			int op = sc.nextInt();
+
+			if (op == 1) {
+
+				Statement stmt = conexion.createStatement();
+				String insert = "DELETE FROM persona WHERE ID = " + id + ";";
+				stmt.executeUpdate(insert);
+
+				System.out.println("Los datos fueron borrados exitosamente");
+				listado(conexion);
+
+			} else {
+				mostrarMenu(sc);
+			}
+
+		} catch (SQLException e) {
+			System.out.println("BAJA DE PERSONA produjo un error al cargar los datos en la base.");
+		}
+	}
+
+	/*
+	 * ----------------------------4.LISTADO(METODO)--------------------------------
+	 * -
+	 */
+
+	private static void listado(Connection conexion) {
+		try {
+
+			System.out.println();
+			System.out.println("-------Listado--------");
+			System.out.println("ID|NOMBRE|EDAD|F.NACIM");
+			Statement stmt = conexion.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM PERSONA");
+			while (rs.next()) {
+				System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + rs.getDate(4));
+			}
+
+		} catch (SQLException e) {
+			System.out.println("LISTADO produjo un error al cargar los datos en la base.");
+
+		}
+
+	}
+
+	/*---------------------------- 5.BUSCAR POR NOMBRE(METODO)---------------------------------*/
+
+	private static void buscarXnombre(Connection conexion, Scanner sc) {
+
+		try {
+			System.out.println();
+			System.out.println("BUSQUEDA POR NOMBRE");
+			System.out.println("-------------------");
+
+			System.out.println("Ingrese el nombre o las primeras letras:");
+			String busqueda = sc.next();
+
+			Statement stmt = conexion.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM persona " + "WHERE NOMBRE LIKE '" + busqueda + "%';");
+
+			boolean sinResultados = true;
+			boolean encabezado = false;
+
+			while (rs.next()) {
+				sinResultados = false;
+				if (encabezado) {
+					System.out.println("ID|NOMBRE|EDAD|F.NACIM");
+					encabezado = true;
+				}
+				System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + rs.getDate(4));
+			}
+
+			if (sinResultados) {
+				System.out.println("No se encontraron resultados");
+			}
+
+			System.out.println();
+		} catch (SQLException e) {
+			System.out.println("BUSQUEDA POR NOMBRE produjo un error al cargar los datos en la base.");
+
+		}
+
+	}
+
+	/*------------------------CALCULAR EDAD(METODO)---------------------------------*/
 
 	private static int calcularEdad(Date fechaNac) {
 
@@ -336,24 +320,45 @@ public class AppBaseABMPersona {
 		return dif;
 	}
 
-//------------------------MOSTRAR MENU (METODO)---------------------------------
+	/*------------------------MOSTRAR MENU(METODO)---------------------------------*/
 
 	private static int mostrarMenu(Scanner sc) {
 
-		System.out.println("SISTEMA DE PERSONAS (ABM)");
-		System.out.println("=========================");
+		System.out.println(
+				"Menu opciones: 1- Alta |2- Modificacion |3- Baja |4- Listado |5- Buscar por nombre |0- Salir");
 
-		System.out.println("");
-		System.out.println("MENU OPCIONES: ");
-		System.out.println("");
-		System.out.println("1: ALTA ");
-		System.out.println("2: MODIFICACION ");
-		System.out.println("3: BAJA");
-		System.out.println("4: LISTADO");
-		System.out.println("5: BUSCAR POR NOMBRE");
-		System.out.println("0: SALIR");
-		int opcion = 0;
-		opcion = sc.nextInt();
+		int opcion = sc.nextInt();
 		return opcion;
+	}
+
+	/*------------------------BUSQUEDA POR ID(METODO)-----------------------------------*/
+
+	private static void mostrarPorID(Connection conexion, Scanner sc, int id) {
+
+		try {
+
+			Statement stmt = conexion.createStatement();
+			ResultSet rs = stmt
+					.executeQuery("SELECT ID, NOMBRE, EDAD, FECHA_NACIMIENTO FROM persona WHERE ID=" + id + ";");
+
+			boolean sinResultados = true;
+			boolean encabezado = false;
+
+			while (rs.next()) {
+				sinResultados = false;
+				if (encabezado) {
+					System.out.println("ID|NOMBRE|EDAD|F.NACIM");
+					encabezado = true;
+				}
+				System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3) + " " + rs.getDate(4));
+			}
+
+			if (sinResultados) {
+				System.out.println("No se encontraron resultados");
+			}
+
+		} catch (SQLException e) {
+			System.out.println("El id ingresado es incorrecto");
+		}
 	}
 }
