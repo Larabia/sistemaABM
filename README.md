@@ -1,14 +1,17 @@
 # sistemaABM
 Permite subir, modificar, dar de baja y listar el contenido de una base de datos SQL.
 
+
 ## Estructura de la Base 📦
 
 Tabla: PERSONA
 Columnas: ID, NOMBRE, EDAD, FECHA_NACIMIENTO
 
+
 ## Menú de opciones del programa 📋
 
 1- Alta |2- Modificacion |3- Baja |4- Listado |5- Buscar por nombre |0- Salir
+
 
 ### Listado de métodos ⌨️
 
